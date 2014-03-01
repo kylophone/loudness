@@ -1,5 +1,5 @@
 #neg23
-Python script to automation loudness normalization (in LUFS) using FFmpeg and sox. Run the program with a single argument (your audio file) and it will be passed to FFmpeg and sox for analysis and gain adjustment. Correct usage: 
+Python script to automate loudness normalization (in LUFS) using FFmpeg and sox. Run the program with a single argument (your audio file) and it will be passed to FFmpeg and sox for analysis and gain adjustment. Correct usage: 
 ```bash
 $ neg23 somefile.wav
 ```
