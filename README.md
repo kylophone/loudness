@@ -3,6 +3,8 @@ Python script to automate loudness normalization (in LUFS) using FFmpeg and sox.
 ```bash
 $ neg23 somefile.wav
 ```
+A new file with "_neg23" appended to the filename will be created and placed in the directory of the original. 
+
 
 If you want to be able to run neg.py from the terminal by just typing 'neg23', first make the script executable and then copy it to /usr/bin. Like this:
 ```bash
