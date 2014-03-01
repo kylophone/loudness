@@ -4,7 +4,7 @@ Python script to automate loudness normalization (to -23 LUFS) using <a href="ht
 $ neg23 somefile.wav
 ```
 
-If you want to be able to run neg.py from the terminal by just typing 'neg23', first make the script executable and then copy it to /usr/bin. Like this:
+If you want to be able to run neg23.py from the terminal by just typing 'neg23', first make the script executable and then copy it to /usr/bin. Like this:
 ```bash
 $ chmod +x neg23.py
 $ cp neg23.py /usr/bin/neg23
