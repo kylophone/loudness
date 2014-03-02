@@ -2,7 +2,7 @@
 import os, sys, subprocess, re
 if len(sys.argv) == 2:
 	
-	#Passes the audiofile to FFmpeg, parses the output and saves the loudness as a string called loudness.
+	#Passes the audiofile to FFmpeg, parses the output and gets the loudness.
 	print "Processing " + os.path.basename(sys.argv[1]) + "..."
 	AudioFileIn = re.escape(sys.argv[1])
 	proc = subprocess.Popen("ffmpeg -nostats -i " + AudioFileIn + " -filter_complex ebur128 -f null - 2>&1 | tail | grep I: | tr -d I: | tr -d LUFS | tr -d \ ", shell = True, stdout = subprocess.PIPE)
