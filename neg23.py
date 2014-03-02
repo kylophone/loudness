@@ -9,7 +9,7 @@ if len(sys.argv) == 2:
 	loudness = proc.communicate()[0]
 
 	#Passes the audiofile and its loudness to sox for gain adjustment.
-	#the new filename has a "_neg23" appended and placed in the directory of the original file. Output file type is the same as the input file.
+	#the new filename has a "_neg23" appended and placed in the directory of the original file. Output file type is the same as the input.
 	AudioFileOut = os.path.splitext(AudioFileIn)[0] + "_neg23" + os.path.splitext(AudioFileIn)[1]
 	os.system("sox " + AudioFileIn + " " + AudioFileOut + " gain " + str(-1 * (23.0 + float(loudness))))
 	print "Done!" 
