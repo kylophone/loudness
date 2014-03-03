@@ -1,18 +1,38 @@
 #!/usr/bin/python
-import os, sys, subprocess, re
-if len(sys.argv) == 2:
-	
+import os, sys, subprocess, re, mimetypes
+
+def normalize(audioIn, audioOut):
+	print "Processing " + os.path.basename(audioIn) + "...",
+	audioIn = re.escape(audioIn)
+	audioOut = re.escape(audioOut)
 	#Passes the audiofile to FFmpeg, parses the output and gets the loudness.
-	print "Processing " + os.path.basename(sys.argv[1]) + "..."
-	AudioFileIn = re.escape(sys.argv[1])
-	proc = subprocess.Popen("ffmpeg -nostats -i " + AudioFileIn + " -filter_complex ebur128 -f null - 2>&1 | tail | grep I: | tr -d I: | tr -d LUFS | tr -d \ ", shell = True, stdout = subprocess.PIPE)
+	proc = subprocess.Popen("ffmpeg -nostats -i " + audioIn + " -filter_complex ebur128 -f null - 2>&1 | tail | grep I: | tr -d I: | tr -d LUFS | tr -d \ ", shell = True, stdout = subprocess.PIPE)
 	loudness = proc.communicate()[0]
-
 	#Passes the audiofile and its loudness to sox for gain adjustment.
-	#the new filename has a "_neg23" appended and placed in the directory of the original file. Output file type is the same as the input.
-	AudioFileOut = os.path.splitext(AudioFileIn)[0] + "_neg23" + os.path.splitext(AudioFileIn)[1]
-	os.system("sox " + AudioFileIn + " " + AudioFileOut + " gain " + str(-1 * (23.0 + float(loudness))))
-	print "Done!" 
+	os.system("sox " + audioIn + " " + audioOut + " gain " + str(-1 * (23.0 + float(loudness))))
+	print "Done!"
 
+def isAudio(inputPath):
+	return mimetypes.guess_type(re.escape(inputPath))[0].startswith("audio")
+
+#Batch
+if len(sys.argv) == 2 and os.path.isdir(sys.argv[1]):
+	fileList = os.listdir(sys.argv[1])
+	for thisFile in fileList:
+		if not thisFile.startswith(".") and os.path.isfile(sys.argv[1] + "/" + thisFile):
+			if isAudio(os.path.dirname(sys.argv[1]) + "/" + thisFile):
+				pathIn = sys.argv[1] + "/" + thisFile
+				pathOut = sys.argv[1] + "/neg23/" + thisFile
+				if not os.path.isdir(os.path.dirname(pathOut)):
+					os.mkdir(os.path.dirname(pathOut))
+				normalize(pathIn, pathOut)
+	print "Batch complete."
+#Single
+elif len(sys.argv) == 2 and os.path.isfile(sys.argv[1]) and isAudio(sys.argv[1]): 
+	pathIn = sys.argv[1]
+	pathOut = os.path.dirname(sys.argv[1]) + "/neg23/" + os.path.basename(pathIn)
+	if not os.path.isdir(os.path.dirname(pathOut)):
+		os.mkdir(os.path.dirname(pathOut))
+	normalize(pathIn, pathOut)
 else:
-	print "Please provide a single input file. Correct usage: neg23 somefile.wav"
+	print "Please provide a single file or directory.\nCorrect usage: neg23 somefile.wav OR neg23 /directory/for/batch/processing/"
