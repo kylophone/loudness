@@ -15,6 +15,19 @@ def normalize(audioIn, audioOut):
 def isAudio(inputPath):
 	return mimetypes.guess_type(re.escape(inputPath))[0].startswith("audio")
 
+#fix for relative path input 
+if len(sys.argv) == 2:
+	if sys.argv[1].startswith("./"):
+		if sys.argv[1].startswith("../"):
+			sys.argv[1] = os.path.dirname(os.getcwd()) + "/" + sys.argv[1][:3]
+		else:
+			sys.argv[1] = os.getcwd() + "/" + sys.argv[1][:2]
+	elif sys.argv[1].startswith("/"):
+		sys.argv[1] = sys.argv[1]
+	else:
+		sys.argv[1] = os.getcwd() + "/" + sys.argv[1]
+print sys.argv[1]
+
 #Batch
 if len(sys.argv) == 2 and os.path.isdir(sys.argv[1]):
 	fileList = os.listdir(sys.argv[1])
