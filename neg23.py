@@ -25,7 +25,6 @@ if len(sys.argv) == 2:
 		sys.argv[1] = sys.argv[1]
 	else:
 		sys.argv[1] = os.getcwd() + "/" + sys.argv[1]
-print sys.argv[1]
 
 #Batch
 if len(sys.argv) == 2 and os.path.isdir(sys.argv[1]):
