@@ -18,7 +18,7 @@ def isAudio(inputPath):
 #fix for relative path input 
 if len(sys.argv) == 2:
 	if sys.argv[1].startswith("./"):
-			sys.argv[1] = os.getcwd() + "/" + sys.argv[1][2:]
+		sys.argv[1] = os.getcwd() + "/" + sys.argv[1][2:]
 	elif sys.argv[1].startswith("../"):
 		sys.argv[1] = os.path.dirname(os.getcwd()) +  "/" + sys.argv[1][3:]
 	elif sys.argv[1].startswith("/"):
