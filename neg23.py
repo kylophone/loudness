@@ -1,49 +1,54 @@
 #!/usr/bin/python
-import os, sys, subprocess, re, mimetypes
+import os, sys, re, subprocess, string, mimetypes, math
 
-def normalize(audioIn, audioOut):
-	print "Processing " + os.path.basename(audioIn) + "...",
-	audioIn = re.escape(audioIn)
-	audioOut = re.escape(audioOut)
-	#Passes the audiofile to FFmpeg, parses the output and gets the loudness.
-	proc = subprocess.Popen("ffmpeg -nostats -i " + audioIn + " -filter_complex ebur128 -f null - 2>&1 | tail | grep I: | tr -d I: | tr -d LUFS | tr -d \ ", shell = True, stdout = subprocess.PIPE)
-	loudness = proc.communicate()[0]
-	#Passes the audiofile and its loudness to sox for gain adjustment.
-	os.system("sox " + audioIn + " " + audioOut + " gain " + str(-1 * (23.0 + float(loudness))))
-	print "Done!"
-
-def isAudio(inputPath):
-	return mimetypes.guess_type(re.escape(inputPath))[0].startswith("audio")
-
-#fix for relative path input 
-if len(sys.argv) == 2:
-	if sys.argv[1].startswith("./"):
-		sys.argv[1] = os.getcwd() + "/" + sys.argv[1][2:]
-	elif sys.argv[1].startswith("../"):
-		sys.argv[1] = os.path.dirname(os.getcwd()) +  "/" + sys.argv[1][3:]
-	elif sys.argv[1].startswith("/"):
-		sys.argv[1] = sys.argv[1]
-	else:
-		sys.argv[1] = os.getcwd() + "/" + sys.argv[1]
-
-#Batch
+#Directory Mode:
 if len(sys.argv) == 2 and os.path.isdir(sys.argv[1]):
+	os.chdir(sys.argv[1])
 	fileList = os.listdir(sys.argv[1])
 	for thisFile in fileList:
-		if not thisFile.startswith(".") and os.path.isfile(sys.argv[1] + "/" + thisFile):
-			if isAudio(os.path.dirname(sys.argv[1]) + "/" + thisFile):
-				pathIn = sys.argv[1] + "/" + thisFile
-				pathOut = sys.argv[1] + "/neg23/" + thisFile
-				if not os.path.isdir(os.path.dirname(pathOut)):
-					os.mkdir(os.path.dirname(pathOut))
-				normalize(pathIn, pathOut)
+		if thisFile.startswith(".") or mimetypes.guess_type(re.escape(thisFile))[0] == None or not mimetypes.guess_type(re.escape(thisFile))[0].startswith("audio"):
+			continue
+		print "Processing " + thisFile + "...",
+		proc = subprocess.Popen("ffmpeg -nostats -i " + re.escape(thisFile) + " -filter_complex ebur128 -f null - 2>&1| tail -n 14", shell = True, stdout = subprocess.PIPE)
+		stats = proc.communicate()[0]
+		#Error-check:
+		if "No such file" in stats or "could not find" in stats or "Error" in stats:
+			print "Error."
+			continue
+		#Get IL:
+		IL = stats.split("\n")[6]
+		IL = IL.replace("LUFS", "")
+		IL = IL.replace("I:", "")
+		#Adjust Gain:
+		dB = (-1 * (23.0 + float(IL)))
+		linear = 10 ** (dB / 20)
+		if not os.path.isdir("./neg23"):
+			os.makedirs("neg23")
+		subprocess.Popen("ffmpeg -v 0 -i " + re.escape(thisFile) + " -af 'volume=" + str(linear) + "' ./neg23/" + re.escape(thisFile), shell = True)
+		print "Done"
 	print "Batch complete."
-#Single
-elif len(sys.argv) == 2 and os.path.isfile(sys.argv[1]) and isAudio(sys.argv[1]): 
-	pathIn = sys.argv[1]
-	pathOut = os.path.dirname(sys.argv[1]) + "/neg23/" + os.path.basename(pathIn)
-	if not os.path.isdir(os.path.dirname(pathOut)):
-		os.mkdir(os.path.dirname(pathOut))
-	normalize(pathIn, pathOut)
+#Singlefile Mode:
+elif len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
+	os.chdir(os.path.dirname(sys.argv[1]))
+	if sys.argv[1].startswith(".") or mimetypes.guess_type(re.escape(sys.argv[1]))[0] == None or not mimetypes.guess_type(re.escape(sys.argv[1]))[0].startswith("audio"):
+			sys.exit("Not a valid audio file.")
+	print "Processing " + sys.argv[1] + "...",
+	proc = subprocess.Popen("ffmpeg -nostats -i " + re.escape(sys.argv[1]) + " -filter_complex ebur128 -f null - 2>&1| tail -n 14", shell = True, stdout = subprocess.PIPE)
+	stats = proc.communicate()[0]
+	#Error-check:
+	if "No such file" in stats or "could not find" in stats or "Error" in stats:
+		sys.exit("Error.")
+	#Get IL:
+	IL = stats.split("\n")[6]
+	IL = IL.replace("LUFS", "")
+	IL = IL.replace("I:", "")
+	#Adjust Gain:
+	dB = (-1 * (23.0 + float(IL)))
+	linear = 10 ** (dB / 20)
+	if not os.path.isdir("./neg23"):
+		os.makedirs("neg23")
+	subprocess.Popen("ffmpeg -v 0 -i " + re.escape(sys.argv[1]) + " -af 'volume=" + str(linear) + "' ./neg23/" + re.escape(os.path.basename(sys.argv[1])), shell = True)
+	print "Done"
 else:
 	print "Please provide a single file or directory.\nCorrect usage: neg23 somefile.wav OR neg23 /directory/for/batch/processing/"
+
