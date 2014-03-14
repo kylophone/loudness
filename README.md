@@ -11,8 +11,7 @@ $ chmod +x neg23.py
 $ cp neg23.py /usr/bin/neg23
 ```
 
-You should have both FFmpeg and sox installed on your machine.
+You should have both FFmpeg installed on your machine.
 ```bash
 $ brew install ffmpeg
-$ brew install sox
 ```
