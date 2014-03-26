@@ -24,7 +24,7 @@ if len(sys.argv) == 2 and os.path.isdir(sys.argv[1]):
 		linear = 10 ** (dB / 20)
 		if not os.path.isdir("./neg23"):
 			os.makedirs("neg23")
-		subprocess.Popen("ffmpeg -v 0 -i " + re.escape(thisFile) + " -af 'volume=" + str(linear) + "' ./neg23/" + re.escape(thisFile), shell = True)
+		subprocess.Popen("ffmpeg -v 0 -y -i " + re.escape(thisFile) + " -af 'volume=" + str(linear) + "' ./neg23/" + re.escape(thisFile), shell = True)
 		print "Done"
 	print "Batch complete."
 #Singlefile Mode:
@@ -47,7 +47,7 @@ elif len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
 	linear = 10 ** (dB / 20)
 	if not os.path.isdir("./neg23"):
 		os.makedirs("neg23")
-	subprocess.Popen("ffmpeg -v 0 -i " + re.escape(sys.argv[1]) + " -af 'volume=" + str(linear) + "' ./neg23/" + re.escape(os.path.basename(sys.argv[1])), shell = True)
+	subprocess.Popen("ffmpeg -v 0 -y -i " + re.escape(sys.argv[1]) + " -af 'volume=" + str(linear) + "' ./neg23/" + re.escape(os.path.basename(sys.argv[1])), shell = True)
 	print "Done"
 else:
 	print "Please provide a single file or directory.\nCorrect usage: neg23 somefile.wav OR neg23 /directory/for/batch/processing/"
