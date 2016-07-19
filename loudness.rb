@@ -17,6 +17,7 @@ end
 ff_string  = "#{ffmpeg_bin} -hide_banner "
 ff_string += "-i #{ARGF.argv[0]} "
 ff_string += '-af loudnorm='
+ff_string += 'dual_mono=true:'
 ff_string += "I=#{target_il}:"
 ff_string += "LRA=#{target_lra}:"
 ff_string += "tp=#{target_tp}:"
@@ -28,6 +29,7 @@ _stdin, _stdout, stderr, wait_thr = Open3.popen3(ff_string)
 if wait_thr.value.success?
   stats = JSON.parse(stderr.read.lines[-12, 12].join)
   loudnorm_string  = '-af loudnorm='
+  loudnorm_string += 'dual_mono=true:'
   loudnorm_string += 'print_format=summary:'
   loudnorm_string += 'linear=true:'
   loudnorm_string += "I=#{target_il}:"
